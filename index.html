@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>REVAMP: Reliability-Aware Dynamics-Value World Models for VLA Policy Improvement</title>
+  <meta name="description" content="REVAMP: a unified action-and-contact-conditioned world model with a two-signal reliability mechanism for improving VLA policies beyond supervised fine-tuning.">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+
+  <style>
+    body { font-family: 'Noto Sans', sans-serif; }
+    .publication-title { font-family: 'Google Sans', sans-serif; }
+    .figure-img { max-width: 100%; height: auto; border-radius: 8px; box-shadow: 0 2px 12px rgba(0,0,0,0.12); }
+    .overview-img { display: block; width: 100%; height: auto; border-radius: 8px; }
+    .pdf-figure { display: block; width: 100%; border: none; border-radius: 8px; box-shadow: 0 2px 12px rgba(0,0,0,0.12); }
+    .demo-video, .single-video { width: 100%; border-radius: 8px; box-shadow: 0 2px 12px rgba(0,0,0,0.15); background: #000; }
+    .qvideo { width: 100%; border-radius: 6px; background: #000; }
+    .link-button { margin: 0.35rem; }
+    .video-tabs .button { margin: 0.2rem; }
+    .video-tabs .button.is-active { background: #1565C0; color: #fff; border-color: #1565C0; }
+    .results-table td, .results-table th { vertical-align: middle; }
+    .mean-row { background: #f5f5f5; }
+    .section { padding-top: 2.5rem; padding-bottom: 2.5rem; }
+    .tag-suc { color: #257942; }
+    .tag-fail { color: #cc0f35; }
+    .content ul { display: inline-block; text-align: left; }
+  </style>
+</head>
+<body>
+
+<!-- Hero / Title -->
+<section class="hero">
+  <div class="hero-body">
+    <div class="container">
+      <div class="columns is-centered">
+        <div class="column has-text-centered">
+          <h1 class="title is-2 publication-title">
+            <b>REVAMP</b>: Reliability-Aware Dynamics-Value World Models<br>
+            for VLA Policy Improvement
+          </h1>
+          <div class="is-size-4 publication-authors" style="margin-top:1rem;">
+            <span class="author-block">Anonymous Author(s)</span>
+          </div>
+          <div class="is-size-6 has-text-grey" style="margin-top:0.5rem;">
+            Submitted to the 10th Conference on Robot Learning (CoRL 2026)
+          </div>
+          <div class="buttons is-centered" style="margin-top:1.25rem;">
+            <a href="https://github.com/revampcorl/revamp_codebase" class="button is-dark is-rounded link-button">
+              <span class="icon"><i class="fab fa-github"></i></span><span>Code</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Demo video (front) -->
+<section class="hero teaser">
+  <div class="container is-max-desktop">
+    <div class="hero-body">
+      <video class="demo-video" controls autoplay loop muted playsinline preload="metadata">
+        <source src="./static/videos/demo.mp4" type="video/mp4">
+        Your browser does not support the video tag.
+      </video>
+    </div>
+  </div>
+</section>
+
+<!-- Abstract -->
+<section class="section">
+  <div class="container is-max-desktop">
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-two-thirds">
+        <h2 class="title is-2">Abstract</h2>
+        <div class="content has-text-justified">
+          <p>
+            Improving vision-language-action (VLA) policies beyond supervised fine-tuning (SFT) is a
+            central bottleneck for scalable robot manipulation. Because real-robot improvement is hard to
+            scale, recent work performs most of it inside a learned video world model. But existing
+            world-model methods face a dilemma: they either re-weight the trajectories the demonstrations
+            already contain&mdash;and so cannot teach new behaviors&mdash;or they explore beyond the
+            demonstration support into regions where the world model is unreliable, a gap co-training cannot
+            close because the policy only ever follows the model's own distribution and never visits its
+            hallucination regions. We propose <b>REVAMP</b>, a unified action-and-contact-conditioned world
+            model whose single DiT backbone produces both future-observation predictions and
+            action-conditioned Q-values. This shared encoder is the crux of our approach: it makes the model
+            compatible with flow-matching VLA policies via Adjoint Matching, and it supports a two-signal
+            reliability mechanism that pairs flow-matching self-consistency (<b>geometric faithfulness</b>)
+            with probe-and-inverse-dynamics verification (<b>action faithfulness</b>). These signals close a
+            self-improving loop: unreliable states trigger targeted real-environment rollouts that correct
+            the world model precisely where it was wrong, so the next round of imagined improvement can
+            explore further without entering a hallucination region. Across three RoboCasa simulation tasks
+            and three real-robot tasks, <b>REVAMP</b> improves the pretrained policy by <b>15 to 17</b>
+            success-rate points in simulation and <b>25 to 28</b> on the real robot, outperforming both DSRL
+            and a VLAW-style baseline on every task under an equal real-interaction budget.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Method -->
+<section class="section">
+  <div class="container is-max-desktop">
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-full-width">
+        <h2 class="title is-2">Method Overview</h2>
+        <object class="pdf-figure" style="aspect-ratio:2032/1024;" data="./static/images/method.pdf#toolbar=0&navpanes=0&scrollbar=0" type="application/pdf">
+          <a href="./static/images/method.pdf">View the architecture figure (PDF)</a>
+        </object>
+        <div class="content has-text-centered" style="margin-top:1.25rem;">
+          <p>REVAMP has three parts:</p>
+          <ul>
+            <li>
+              <b>Unified world model.</b> A single Wan2.2-based DiT backbone, conditioned on the action
+              chunk and a contact signal, with two heads sharing one encoder: a <b>dynamics head</b> that
+              predicts future multi-view frames and a <b>Q-head</b> that predicts action-and-contact-conditioned
+              Q-values. The shared encoder lets the Q-head capture subtle contact effects such as failed
+              grasps where the visual change is minimal.
+            </li>
+            <li>
+              <b>Reliability-aware mechanism.</b> Every prediction is scored by two signals: an intrinsic
+              velocity-field self-consistency residual (<b>geometric faithfulness</b>) and an external
+              visual-probe-plus-inverse-dynamics check that recovers the implied action chunk
+              (<b>action faithfulness</b>).
+            </li>
+            <li>
+              <b>Closed-loop improvement.</b> A frequent imagination loop fine-tunes the policy with
+              reliability-gated Adjoint Matching (QAM), while a sparse real-interaction loop triggers
+              targeted real rollouts at flagged states and refits the world model exactly where it was
+              unreliable.
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Tasks -->
+<section class="section" style="padding-top:0;">
+  <div class="container is-max-desktop">
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-full-width">
+        <h2 class="title is-2">Tasks</h2>
+        <div class="content has-text-centered">
+          <p>
+            We evaluate REVAMP on three <b>RoboCasa simulation</b> tasks and three <b>real-robot</b> tasks,
+            spanning articulated-object manipulation, contact-rich interaction, and long-horizon
+            pick-and-place.
+          </p>
+          <div class="columns">
+            <div class="column">
+              <h3 class="title is-5">Simulation (RoboCasa)</h3>
+              <ul>
+                <li><b>TurnOnSinkFaucet</b> &mdash; articulated-object manipulation</li>
+                <li><b>OpenCabinet</b> &mdash; articulated-object manipulation</li>
+                <li><b>PickPlaceCounterToStove</b> &mdash; long-horizon pick-and-place</li>
+              </ul>
+            </div>
+            <div class="column">
+              <h3 class="title is-5">Real robot</h3>
+              <ul>
+                <li><b>Open Jar</b> &mdash; rotate and detach the lid</li>
+                <li><b>Stack Box</b> &mdash; place the object and reach a stable stack</li>
+                <li><b>Fold Cloth</b> &mdash; fold the cloth into a compact square</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Results -->
+<section class="section" style="padding-top:0;">
+  <div class="container is-max-desktop">
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-full-width">
+        <h2 class="title is-2">Results</h2>
+        <div class="content has-text-centered">
+          <p>
+            Imagined improvement alone already lifts the pretrained &pi;<sub>0</sub> policy on every task
+            with no new interaction. Two rounds of targeted online correction further raise the simulation
+            gains, and REVAMP outperforms both DSRL and a VLAW-style baseline on every task under an equal
+            real-interaction budget.
+          </p>
+        </div>
+        <div class="table-container">
+          <table class="table is-bordered is-striped is-narrow is-hoverable is-fullwidth has-text-centered results-table">
+            <thead>
+              <tr>
+                <th class="has-text-left">Setting</th>
+                <th>Task</th>
+                <th>Success-rate gain over &pi;<sub>0</sub></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td rowspan="3" class="has-text-left"><b>Simulation</b></td><td>TurnOnSinkFaucet</td><td><b>+16.0</b></td></tr>
+              <tr><td>OpenCabinet</td><td><b>+15.4</b></td></tr>
+              <tr><td>PickPlaceCounterToStove</td><td><b>+17.0</b></td></tr>
+              <tr class="mean-row"><td class="has-text-left"><b>Real robot</b></td><td>Open Jar / Stack Box / Fold Cloth</td><td><b>+25 to +28</b></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="has-text-grey is-size-7 has-text-centered">Success-rate gains in percentage points over the SFT-pretrained &pi;<sub>0</sub> policy.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Q-Value Visualization (6-task switcher) -->
+<section class="section" style="padding-top:0;">
+  <div class="container is-max-desktop">
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-full-width">
+        <h2 class="title is-2">Q-Value Visualization</h2>
+        <div class="content has-text-centered">
+          <p>
+            Select a task to compare a <span class="tag-suc has-text-weight-bold">success</span> and a
+            <span class="tag-fail has-text-weight-bold">failure</span> rollout. Each clip shows the three
+            camera views alongside the world model's predicted <b>Q-value / cost</b> over the rollout: it
+            rises toward task completion on successful executions and stays low when the policy fails.
+          </p>
+        </div>
+
+        <div id="qvis-switcher">
+          <div class="buttons is-centered video-tabs">
+            <button class="button is-rounded is-active" data-key="turn">TurnOnSinkFaucet</button>
+            <button class="button is-rounded" data-key="open">OpenCabinet</button>
+            <button class="button is-rounded" data-key="pick">PickPlaceCounterToStove</button>
+            <button class="button is-rounded" data-key="openjar">Open Jar</button>
+            <button class="button is-rounded" data-key="stack">Stack Box</button>
+            <button class="button is-rounded" data-key="merge">Fold Cloth</button>
+          </div>
+          <div class="columns" style="margin-top:0.5rem;">
+            <div class="column">
+              <p class="tag-suc has-text-weight-bold">Success</p>
+              <video id="qvis-suc" class="qvideo" autoplay loop muted playsinline controls
+                     src="./static/videos/turn_suc.mp4"></video>
+            </div>
+            <div class="column">
+              <p class="tag-fail has-text-weight-bold">Failure</p>
+              <video id="qvis-fail" class="qvideo" autoplay loop muted playsinline controls
+                     src="./static/videos/turn_fail.mp4"></video>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Real-Robot Rollouts -->
+<section class="section" style="padding-top:0;">
+  <div class="container is-max-desktop">
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-full-width">
+        <h2 class="title is-2">Real-Robot Rollouts</h2>
+        <div class="content has-text-centered">
+          <p>Autonomous real-robot rollouts of a REVAMP-improved policy on the dual-arm platform.</p>
+        </div>
+        <div id="real-switcher">
+          <div class="buttons is-centered video-tabs">
+            <button class="button is-rounded is-active" data-video="openjar_real">Open Jar</button>
+            <button class="button is-rounded" data-video="stackbox_real">Stack Box</button>
+            <button class="button is-rounded" data-video="foldcloth_real">Fold Cloth</button>
+          </div>
+          <video id="real-video" class="single-video" autoplay loop muted playsinline controls
+                 src="./static/videos/openjar_real.mp4"></video>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="footer" style="padding:1.5rem;">
+  <div class="content has-text-centered has-text-grey is-size-7">
+    <p>
+      Project page template adapted from the
+      <a href="https://github.com/nerfies/nerfies.github.io">Nerfies</a> project page.
+    </p>
+  </div>
+</footer>
+
+<script>
+  // Q-value visualization: 6-task switcher (success | failure)
+  (function () {
+    var wrap = document.getElementById('qvis-switcher');
+    if (!wrap) return;
+    var suc = document.getElementById('qvis-suc');
+    var fail = document.getElementById('qvis-fail');
+    wrap.querySelectorAll('button[data-key]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        wrap.querySelectorAll('button').forEach(function (b) { b.classList.remove('is-active'); });
+        btn.classList.add('is-active');
+        var k = btn.getAttribute('data-key');
+        suc.src = './static/videos/' + k + '_suc.mp4';
+        fail.src = './static/videos/' + k + '_fail.mp4';
+        suc.play(); fail.play();
+      });
+    });
+  })();
+
+  // Real-robot rollouts: single-video switcher
+  (function () {
+    var wrap = document.getElementById('real-switcher');
+    if (!wrap) return;
+    var vid = document.getElementById('real-video');
+    wrap.querySelectorAll('button[data-video]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        wrap.querySelectorAll('button').forEach(function (b) { b.classList.remove('is-active'); });
+        btn.classList.add('is-active');
+        vid.src = './static/videos/' + btn.getAttribute('data-video') + '.mp4';
+        vid.play();
+      });
+    });
+  })();
+</script>
+
+</body>
+</html>
